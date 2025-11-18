@@ -1,0 +1,126 @@
+import random
+import time
+
+# Data soal per level simulasi kurikulum
+questions_per_level = {
+    1: [
+        {"question": "2 + 3 = ?", "choices": ["3", "4", "5", "6"], "answer": "5"},
+        {"question": "Color of sky during day?", "choices": ["Blue", "Green", "Red", "Yellow"], "answer": "Blue"},
+    ],
+    2: [
+        {"question": "Capital city of France?", "choices": ["Paris", "Berlin", "London", "Rome"], "answer": "Paris"},
+        {"question": "Sun rises from the?", "choices": ["West", "East", "North", "South"], "answer": "East"},
+    ],
+    3: [
+        {"question": "Who wrote 'Romeo and Juliet'?", "choices": ["Shakespeare", "Hemingway", "Tolkien", "Rowling"], "answer": "Shakespeare"},
+        {"question": "Water freezes at what degrees Celsius?", "choices": ["0", "100", "50", "10"], "answer": "0"},
+    ]
+}
+
+characters = {
+    "Spark the Brave": {"cost": 5, "unlocked": False},
+    "Luna the Wise": {"cost": 10, "unlocked": False},
+    "Max the Swift": {"cost": 15, "unlocked": False}
+}
+
+player = {
+    "coins": 0,
+    "current_level": 1,
+    "unlocked_characters": []
+}
+
+def show_intro():
+    print("Welcome to QuizQuest Heroes!")
+    print("Petualangan belajar dimulai, jawab soal dan kumpulkan koin untuk membuka karakter lucu.
+")
+
+def display_characters():
+    print("
+Karakter yang tersedia:")
+    for char, data in characters.items():
+        status = "Terbuka" if data["unlocked"] else f"Biaya: {data['cost']} koin"
+        print(f"- {char} : {status}")
+
+def unlock_character():
+    display_characters()
+    choice = input("Masukkan nama karakter untuk membuka (atau kosong untuk batal): ").strip()
+    if choice in characters:
+        if characters[choice]["unlocked"]:
+            print(f"Karakter {choice} sudah terbuka.")
+        elif player["coins"] >= characters[choice]["cost"]:
+            player["coins"] -= characters[choice]["cost"]
+            characters[choice]["unlocked"] = True
+            player["unlocked_characters"].append(choice)
+            print(f"Berhasil membuka karakter {choice}!")
+        else:
+            print("Koin tidak cukup untuk membuka karakter ini.")
+    elif choice == "":
+        print("Batal membuka karakter.")
+    else:
+        print("Karakter tidak ditemukan.")
+
+def play_level(level):
+    print(f"
+=== Level {level} ===")
+    questions = questions_per_level[level]
+    random.shuffle(questions)
+    correct = 0
+    for q in questions:
+        print(f"
+{q['question']}")
+        for idx, choice in enumerate(q["choices"], 1):
+            print(f"  {idx}. {choice}")
+        while True:
+            try:
+                ans = int(input("Jawaban Anda (masukkan nomor): "))
+                if 1 <= ans <= len(q["choices"]):
+                    break
+                else:
+                    print("Pilihan tidak valid, coba lagi.")
+            except:
+                print("Input harus angka, coba lagi.")
+        if q["choices"][ans - 1].lower() == q["answer"].lower():
+            print("Benar!")
+            correct += 1
+            player["coins"] += 2
+        else:
+            print(f"Salah. Jawaban benar: {q['answer']}")
+        time.sleep(1)
+    print(f"Skor Anda di level {level}: {correct} dari {len(questions)}")
+    if correct >= len(questions)//2:
+        print(f"Selamat! Anda naik ke level {level+1}
+")
+        player["current_level"] += 1
+    else:
+        print("Coba ulang level ini untuk naik level.
+")
+
+def main():
+    show_intro()
+    while True:
+        print(f"
+Anda memiliki {player['coins']} koin dan berada di level {player['current_level']}.")
+        action = input("Pilih aksi: (1) Main Level (2) Buka Karakter (3) Tampilkan Karakter Terbuka (4) Keluar
+Masukkan pilihan: ")
+        if action == "1":
+            if player["current_level"] in questions_per_level:
+                play_level(player["current_level"])
+            else:
+                print("Selamat! Anda telah menyelesaikan semua level yang tersedia.")
+        elif action == "2":
+            unlock_character()
+        elif action == "3":
+            print("
+Karakter terbuka:")
+            for c in player["unlocked_characters"]:
+                print(f"- {c}")
+            if not player["unlocked_characters"]:
+                print("Belum ada karakter yang terbuka.")
+        elif action == "4":
+            print("Terima kasih telah bermain QuizQuest Heroes!")
+            break
+        else:
+            print("Pilihan tidak dikenal, coba lagi.")
+
+if __name__ == "__main__":
+    main()
